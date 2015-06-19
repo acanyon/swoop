@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <title>Join Swoop && Sinatra!</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
+      <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+  </head>
+  <body>
+      <div style="font-size:20px;text-align:center;">Hello World!</div>
+      <div id="map-canvas" style="position:absolute;top:0;left:0;right:0;bottom:0;"></div>
+  </body>
+
+  <script type="text/javascript">
+    var googleMap;
+    var mapMarkers = [];
+    $(function () {
+        googleMap = new google.maps.Map($('#map-canvas')[0], {
+            zoom: 12,
+            center: {lat: 37.7577, lng: -122.4376}
+        });
+        
+        fetchDriverPositions();
+        delaySetDriverPosition();
+    });
+
+    function updatePositionTest () {
+        $.post('/api/update_position', {android_id: 'android', lat: '37.794556', lng: '-122.412998'});
+    }
+
+    function delaySetDriverPosition () {
+        setTimeout(function () {
+            fetchDriverPositions(delaySetDriverPosition);
+        }, 2000);
+    };
+
+    function fetchDriverPositions (callback) {
+        console.log('set driver position');
+        $.ajax('/api/driver_position')
+            .done(function (data) {
+                _.each(mapMarkers, function (marker) { marker.setMap(null); });
+                mapMarkers = _.map(data.drivers, function (position) {
+                    return new google.maps.Marker({
+                        position: new google.maps.LatLng(position.lat, position.lng),
+                        map: googleMap,
+                        title: 'Hello World!'
+                    });
+                });
+                callback && callback();
+            });
+    }
+  </script>
+
+</html>
+
