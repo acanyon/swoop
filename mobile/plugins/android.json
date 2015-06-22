@@ -1,0 +1,15 @@
+{
+    "prepare_queue": {
+        "installed": [],
+        "uninstalled": []
+    },
+    "config_munge": {
+        "files": {}
+    },
+    "installed_plugins": {
+        "com.googlemaps.ios": {
+            "PACKAGE_NAME": "com.joinswoop.mobile"
+        }
+    },
+    "dependent_plugins": {}
+}
