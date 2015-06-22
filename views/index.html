@@ -36,7 +36,7 @@
         }, 2000);
     };
 
-    function fetchDriverPositions (callback) {
+    function fetchDriverPositions (onsuccess) {
         console.log('set driver position');
         $.ajax('/api/driver_position')
             .done(function (data) {
@@ -48,7 +48,7 @@
                         title: 'Hello World!'
                     });
                 });
-                callback && callback();
+                onsuccess && onsuccess();
             });
     }
   </script>
