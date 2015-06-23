@@ -27,5 +27,5 @@ post '/api/update_position' do
         lng: params['lng']
     }
     content_type :json
-    { success: true }
+    { success: true }.to_json
 end
