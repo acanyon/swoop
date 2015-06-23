@@ -13,7 +13,7 @@ get '/' do
   send_file 'views/index.html'
 end
 
-get '/api/driver_position' do
+get '/api/driver_position/?' do
   content_type :json
   { drivers: @@driver_positions.values }.to_json
 end
@@ -21,7 +21,7 @@ end
 # @param android_id
 # @param lat
 # @param lng
-post '/api/update_position' do
+post '/api/update_position/?' do
     @@driver_positions[params['android_id']] = {
         lat: params['lat'],
         lng: params['lng']
