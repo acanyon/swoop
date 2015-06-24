@@ -44,29 +44,35 @@
         console.log('set driver position');
         $.ajax('/api/driver_position')
             .done(function (data) {
-                _.each(data.drivers, function (position) {
-                    var marker = mapMarkers[position.id];
+                _.each(data.drivers, function (marker_info) {
+                    var marker = mapMarkers[marker_info.id];
                     if (marker) {
-                        _.bind(animateMarkerPosition, marker)(new google.maps.LatLng(position.lat, position.lng));
+                        var new_pos = new google.maps.LatLng(marker_info.lat, marker_info.lng);
+                        if (!marker._sw_props.final_pos.equals(new_pos)) {
+                            _.bind(animateMarkerPosition, marker)(new_pos);
+                            marker._sw_props.final_pos = new_pos;
+                        }
                     } else {
-                        mapMarkers[position.id] = new google.maps.Marker({
-                            position: new google.maps.LatLng(position.lat, position.lng),
+                        var pos = new google.maps.LatLng(marker_info.lat, marker_info.lng);
+                        marker = new google.maps.Marker({
+                            position: new google.maps.LatLng(marker_info.lat, marker_info.lng),
                             map: googleMap,
                             title: 'Hello World!'
                         });
+                        marker._sw_props.final_pos = pos;
+                        mapMarkers[marker_info.id] = marker;
                     }
                 });
                 onsuccess && onsuccess();
             });
     }
 
+    google.maps.Marker.prototype._sw_props = {};
     
-
     function animateMarkerPosition (target) {
         // this == marker
         var NUM_SLICE = 10;
         var TOTAL_TIME = 250; // 2s
-        this._sw_props = this._sw_props || {};
         var pos = this.getPosition();
         if (!pos.equals(target)) {
             var latdif = (target.lat() - pos.lat()) * 10000 / NUM_SLICE;
@@ -79,13 +85,13 @@
                 newlng += lngdif;
                 this._sw_props.anim_stack.push(new google.maps.LatLng(newlat/10000, newlng/10000));
             }
-            !this._sw_props.animTimeout && _.bind(_animateNext, this)(TOTAL_TIME/NUM_SLICE);
-            debugger;
+            _.bind(_animateNext, this)(TOTAL_TIME/NUM_SLICE);
         }
     }
 
     function _animateNext (time) {
         this._sw_props.length && this.setPosition(this._sw_props.anim_stack.shift());
+        this._sw_props.animTimout && this._sw_props.animTimout.clearTimeout();
         this._sw_props.animTimeout = setTimeout(_.bind(function () {
             var new_pos = this._sw_props.anim_stack.shift();
             if (new_pos) {
