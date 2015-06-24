@@ -1,1 +1,33 @@
 /* Empty. Add your own CSS if you like */
+
+/*** Home ***/
+
+ion-view[view-title="Home"] {
+    background-color: rgb(33, 33, 41);
+    font-size: 24px;
+    padding-top: 60px;
+    text-align: center;
+}
+
+ion-view[view-title="Home"] ion-content {
+    color: #ffffff;
+    padding: 100px;
+}
+
+
+/*** About ***/
+
+ion-view[view-title="About"] {
+    background-color: rgb(33, 33, 41);
+    text-align: center;
+}
+
+ion-view[view-title="About"] .ico {
+    margin: 60px auto 20px auto;
+}
+
+ion-view[view-title="About"] a {
+    color: rgb(153, 153, 153);
+    text-decoration: none;      
+}
+
