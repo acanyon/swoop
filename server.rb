@@ -9,13 +9,17 @@ require 'json'
     example2: {lat: "37.782928", lng: "-122.393076", example: true } 
 }
 
+def get_drivers
+    @@driver_positions.map {|k, v| v.merge({id: k})}
+end
+
 get '/' do
   send_file 'views/index.html'
 end
 
 get '/api/driver_position/?' do
   content_type :json
-  { drivers: @@driver_positions.values }.to_json
+  { drivers: get_drivers }.to_json
 end
 
 # @param android_id

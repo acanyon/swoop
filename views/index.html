@@ -15,7 +15,7 @@
 
   <script type="text/javascript">
     var googleMap;
-    var mapMarkers = [];
+    var mapMarkers = {};
     $(function () {
         googleMap = new google.maps.Map($('#map-canvas')[0], {
             zoom: 12,
@@ -28,7 +28,10 @@
     });
 
     function updatePositionTest () {
-        $.post('/api/update_position', {android_id: 'android', lat: '37.794556', lng: '-122.412998'});
+        $.post('/api/update_position', {android_id: 'moving_test', lat: '37.774556', lng: '-122.442998'});
+        setTimeout(function () {
+            $.post('/api/update_position', {android_id: 'moving_test', lat: '37.778556', lng: '-122.412998'});
+        }, 2000);
     }
 
     function delaySetDriverPosition () {
@@ -41,17 +44,57 @@
         console.log('set driver position');
         $.ajax('/api/driver_position')
             .done(function (data) {
-                _.each(mapMarkers, function (marker) { marker.setMap(null); });
-                mapMarkers = _.map(data.drivers, function (position) {
-                    return new google.maps.Marker({
-                        position: new google.maps.LatLng(position.lat, position.lng),
-                        map: googleMap,
-                        title: 'Hello World!'
-                    });
+                _.each(data.drivers, function (position) {
+                    var marker = mapMarkers[position.id];
+                    if (marker) {
+                        _.bind(animateMarkerPosition, marker)(new google.maps.LatLng(position.lat, position.lng));
+                    } else {
+                        mapMarkers[position.id] = new google.maps.Marker({
+                            position: new google.maps.LatLng(position.lat, position.lng),
+                            map: googleMap,
+                            title: 'Hello World!'
+                        });
+                    }
                 });
                 onsuccess && onsuccess();
             });
     }
+
+    
+
+    function animateMarkerPosition (target) {
+        // this == marker
+        var NUM_SLICE = 10;
+        var TOTAL_TIME = 250; // 2s
+        this._sw_props = this._sw_props || {};
+        var pos = this.getPosition();
+        if (!pos.equals(target)) {
+            var latdif = (target.lat() - pos.lat()) * 10000 / NUM_SLICE;
+            var lngdif = (target.lng() - pos.lng()) * 10000 / NUM_SLICE;
+            var newlat = pos.lat() * 10000;
+            var newlng = pos.lng() * 10000;
+            this._sw_props.anim_stack = [];
+            for (var i = 0; i < NUM_SLICE ; i++) {
+                newlat += latdif;
+                newlng += lngdif;
+                this._sw_props.anim_stack.push(new google.maps.LatLng(newlat/10000, newlng/10000));
+            }
+            !this._sw_props.animTimeout && _.bind(_animateNext, this)(TOTAL_TIME/NUM_SLICE);
+            debugger;
+        }
+    }
+
+    function _animateNext (time) {
+        this._sw_props.length && this.setPosition(this._sw_props.anim_stack.shift());
+        this._sw_props.animTimeout = setTimeout(_.bind(function () {
+            var new_pos = this._sw_props.anim_stack.shift();
+            if (new_pos) {
+                this.setPosition(new_pos);
+                _.bind(_animateNext, this)(time);
+            }
+        }, this), time);
+    }
+
   </script>
 
 </html>
